@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthHub - The #1 Personal Health, Workout & Wellness Tracker</title>
+  <meta name="description" content="Track your daily workouts, blood pressure, glucose, weight, nutrition macros, background music and health reminders all in one seamless web app.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body data-theme="light">
+
+  <!-- ==================== AUTH MODAL / POPUP OVERLAY (Login & Signup Kept Same) ==================== -->
+  <div id="authScreenModal" class="auth-modal-overlay hidden">
+    <div class="auth-modal-dialog">
+      <button class="auth-close-btn" id="closeAuthModalBtn">&times;</button>
+      
+      <!-- Login Form (Exact Match to User Images 1 & 2) -->
+      <div class="auth-form" id="loginFormContainer">
+        <div class="auth-header">
+          <h2><i class="fas fa-heartbeat"></i> HealthHub</h2>
+          <p class="auth-subtitle">Welcome back! Please login to continue</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="auth-btn">Login</button>
+          <p class="auth-switch">Don't have an account? <a href="#" id="showSignupLink">Sign up</a></p>
+        </form>
+      </div>
+
+      <!-- Signup Form -->
+      <div class="auth-form hidden" id="signupFormContainer">
+        <div class="auth-header">
+          <h2><i class="fas fa-heartbeat"></i> HealthHub</h2>
+          <p class="auth-subtitle">Create your account to get started</p>
+        </div>
+
+        <form id="signupForm">
+          <div class="form-group">
+            <label for="signupName">Full Name</label>
+            <input type="text" id="signupName" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" placeholder="Create a password" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="signupConfirm">Confirm Password</label>
+            <input type="password" id="signupConfirm" placeholder="Confirm your password" minlength="6" required>
+          </div>
+          <button type="submit" class="auth-btn">Sign Up</button>
+          <p class="auth-switch">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HEVY-STYLE NAVBAR ==================== -->
+  <header class="hevy-navbar">
+    <div class="nav-inner-container">
+      <div class="nav-brand" id="navLogo">
+        <div class="brand-h-icon" style="width: 32px; height: 32px; font-size: 1rem;"><i class="fas fa-heartbeat"></i></div>
+        <span class="brand-logo-text" style="font-size: 1.15rem; letter-spacing: 0.03em;">HealthHub</span>
+      </div>
+
+      <nav class="nav-menu" id="navMenu">
+        <!-- Landing Nav (Logged Out) -->
+        <div id="navLandingMenu" class="nav-group-links">
+          <a href="#" class="nav-link-item active" id="navHomeLink" data-nav="home">Home</a>
+          <a href="#features-section" class="nav-link-item" id="navFeaturesLink" data-nav="features">Features</a>
+          <a href="#contact-footer" class="nav-link-item" data-nav="contact">Contact</a>
+        </div>
+
+        <!-- App Workspace Header Tabs (Logged In) -->
+        <div id="navAppMenu" class="nav-group-links hidden">
+          <button class="nav-tab-pill active" data-workspace-tab="dashboard">
+            <i class="fas fa-th-large"></i> Dashboard
+          </button>
+          <button class="nav-tab-pill" data-workspace-tab="health">
+            <i class="fas fa-heart-pulse"></i> Vitals & Health
+          </button>
+          <button class="nav-tab-pill" data-workspace-tab="exercise">
+            <i class="fas fa-dumbbell"></i> Exercise & Plans
+          </button>
+          <button class="nav-tab-pill" data-workspace-tab="nutrition">
+            <i class="fas fa-apple-whole"></i> Nutrition & Meals
+          </button>
+          <button class="nav-tab-pill" data-workspace-tab="music">
+            <i class="fas fa-music"></i> Music Player
+          </button>
+          <button class="nav-tab-pill" data-workspace-tab="reminders">
+            <i class="fas fa-bell"></i> Reminders
+          </button>
+        </div>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Switcher -->
+        <button id="themeToggleBtn" class="hevy-icon-btn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+          <i class="fas fa-sun sun-icon"></i>
+          <i class="fas fa-moon moon-icon"></i>
+        </button>
+
+        <!-- Header Notification Bell & Dropdown (Logged In) -->
+        <div id="navNotificationWrapper" class="nav-notification-wrapper hidden" style="position:relative;">
+          <button id="headerNotificationBellBtn" class="hevy-icon-btn" title="Notifications" aria-label="Notifications" style="position:relative;">
+            <i class="fas fa-bell"></i>
+            <span id="headerNotificationBadge" class="nav-notif-badge hidden">0</span>
+          </button>
+
+          <!-- Notification Dropdown Menu -->
+          <div id="headerNotificationDropdown" class="notif-dropdown hidden">
+            <div class="notif-dropdown-header">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <i class="fas fa-bell text-primary"></i>
+                <h4 style="margin:0; font-size:0.95rem; font-weight:700;">Notifications</h4>
+              </div>
+              <span id="notifDropdownCount" class="notif-count-pill">0</span>
+            </div>
+            <div id="notifDropdownList" class="notif-dropdown-list">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="notif-dropdown-footer">
+              <button id="markAllNotifsReadBtn" class="notif-footer-action-btn">Mark all read</button>
+              <button id="goToRemindersFromNotifBtn" class="notif-footer-action-btn">View Reminders &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Auth State: Login Button or User Profile Pill -->
+        <div id="navAuthLoggedOut" class="nav-auth-wrap">
+          <button class="nav-login-link" id="navLoginBtn">Log in</button>
+          <button class="hevy-btn-primary" id="navSignupBtn">Get Started</button>
+        </div>
+
+        <div id="navAuthLoggedIn" class="nav-user-pill hidden" title="User Profile and Settings">
+          <div class="user-profile-trigger" id="headerUserProfileTrigger" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <div class="user-avatar-small" id="headerAvatarCircle"><span id="headerAvatarInitial"></span></div>
+            <span class="user-name-text" id="headerUsername">Anza</span>
+          </div>
+          <button class="logout-link-btn" id="logoutBtn" title="Sign Out"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+  </header>
+
+  <audio id="globalAudioPlayer" preload="metadata"></audio>
+
+  <!-- ==================== MAIN PAGE WRAPPER ==================== -->
+  <main class="page-container">
+
+    <!-- LANDING VIEW (Shown before login) -->
+    <div id="landingView">
+      <!-- 1. HEVY-STYLE HERO SECTION -->
+    <section class="hevy-hero" id="hero-section">
+      <div class="hero-inner">
+        
+        <div class="hero-left-content">
+          <h1 class="hero-main-title">
+            The #1 Free Personal <br>
+            <span class="gradient-text">Health & Workout Tracker</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            Track daily workouts with live timers, monitor blood pressure & glucose with clinical ranges, plan meals against macro goals, and stream motivating workout beats without interruptions.
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="hevy-btn-large" id="heroStartTrackingBtn">
+              <i class="fas fa-bolt"></i> Start Tracking Free
+            </button>
+            <button class="hevy-btn-outline" id="heroOpenVitalsBtn">
+              <i class="fas fa-heart-pulse"></i> Open Live Vitals
+            </button>
+          </div>
+
+          <div class="hero-badges-row">
+            <div class="badge-store-pill">
+              <i class="fab fa-apple"></i>
+              <div><small>Available on</small><strong>iOS / Web</strong></div>
+            </div>
+            <div class="badge-store-pill">
+              <i class="fab fa-google-play"></i>
+              <div><small>Available on</small><strong>Android / Web</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Right: High-Fidelity Phone Device Frame Mockup -->
+        <div class="hero-device-wrapper">
+          <div class="phone-device-frame">
+            <div class="phone-dynamic-island"></div>
+            
+            <div class="phone-screen-content">
+              <div class="phone-top-bar">
+                <span>9:41</span>
+                <div class="phone-status-icons">
+                  <i class="fas fa-signal"></i>
+                  <i class="fas fa-wifi"></i>
+                  <i class="fas fa-battery-full"></i>
+                </div>
+              </div>
+
+              <div class="phone-header-title">
+                <div>
+                  <h4>My Health</h4>
+                  <small id="phoneDateDisplay">Sunday, Nov 22</small>
+                </div>
+                <div class="phone-avatar-mini" id="phoneAvatarMini">A</div>
+              </div>
+
+              <!-- Phone Quick 4-Grid Mockup -->
+              <div class="phone-metrics-mini-grid">
+                <div class="phone-mini-tile">
+                  <i class="fas fa-tint text-primary"></i>
+                  <span>BP</span>
+                  <strong id="phoneMockBP">118/76</strong>
+                </div>
+                <div class="phone-mini-tile">
+                  <i class="fas fa-heart-pulse text-danger"></i>
+                  <span>Heart</span>
+                  <strong id="phoneMockHR">68 bpm</strong>
+                </div>
+                <div class="phone-mini-tile">
+                  <i class="fas fa-droplet text-warning"></i>
+                  <span>Glucose</span>
+                  <strong id="phoneMockSugar">90 mg/dL</strong>
+                </div>
+                <div class="phone-mini-tile">
+                  <i class="fas fa-person-running text-success"></i>
+                  <span>Active</span>
+                  <strong id="phoneMockWorkout">40 mins</strong>
+                </div>
+              </div>
+
+              <!-- Phone Live Chart Wave -->
+              <div class="phone-chart-card">
+                <div class="phone-chart-header">
+                  <span>Vitals Dynamic Wave</span>
+                  <span class="badge-tag">Normal</span>
+                </div>
+                <div class="phone-canvas-box">
+                  <canvas id="phonePreviewChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Phone Audio Bar -->
+              <div class="phone-mini-audio">
+                <i class="fas fa-music text-primary"></i>
+                <div class="phone-audio-meta">
+                  <strong id="phoneAudioTitle">Energize Warmup</strong>
+                  <span>SoundHelix Beats &bull; Playing</span>
+                </div>
+                <i class="fas fa-pause-circle text-primary"></i>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. SOCIAL PROOF & STATS BAR (Hevy Trust Metric Bar) -->
+    <section class="hevy-stats-bar">
+      <div class="stats-bar-inner">
+        <div class="stat-item-block">
+          <h3>5M+</h3>
+          <p>Health Readings Logged</p>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item-block">
+          <h3>100%</h3>
+          <p>Local & Private Storage</p>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item-block">
+          <h3>4.9 <i class="fas fa-star" style="color:#f59e0b; font-size:1rem;"></i></h3>
+          <p>User Satisfaction Score</p>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item-block">
+          <h3>Free</h3>
+          <p>No Subscriptions Required</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FEATURE PILLARS (Hevy 3-Column Feature Cards) -->
+    <section class="hevy-features-section" id="features-section">
+      <div class="section-title-wrap text-center">
+        <span class="section-badge-pill">Built For Your Routine</span>
+        <h2 class="section-heading">Everything You Need to Live Healthier</h2>
+        <p class="section-subheading">A single frictionless platform for your entire daily health, fitness, and nutrition life.</p>
+      </div>
+
+      <div class="features-three-grid">
+        <div class="feature-pillar-card">
+          <div class="pillar-icon bg-cyan"><i class="fas fa-heart-pulse"></i></div>
+          <h3>Clinical Health Tracking</h3>
+          <p>Monitor systolic/diastolic blood pressure, resting heart rate, blood sugar, and weight with instant normal/elevated color indicators and CSV exports.</p>
+          <ul class="feature-bullet-list">
+            <li><i class="fas fa-check text-success"></i> AHA Blood Pressure Stage Classification</li>
+            <li><i class="fas fa-check text-success"></i> Dual-line Trend Curves (Chart.js)</li>
+            <li><i class="fas fa-check text-success"></i> Instant CSV Data Download</li>
+          </ul>
+        </div>
+
+        <div class="feature-pillar-card">
+          <div class="pillar-icon bg-blue"><i class="fas fa-dumbbell"></i></div>
+          <h3>Workout Routine & Live Timer</h3>
+          <p>Follow pre-made workout plans (Full Body, Cardio HIIT, Strength, Yoga) or log custom sessions with a live stopwatch that auto-estimates burned calories.</p>
+          <ul class="feature-bullet-list">
+            <li><i class="fas fa-check text-success"></i> 4 Structured Pre-Made Routines</li>
+            <li><i class="fas fa-check text-success"></i> Live Session Timer with Calorie Calculator</li>
+            <li><i class="fas fa-check text-success"></i> 7-Day Active Minutes & Burned Aggregator</li>
+          </ul>
+        </div>
+
+        <div class="feature-pillar-card">
+          <div class="pillar-icon bg-emerald"><i class="fas fa-utensils"></i></div>
+          <h3>Nutrition & Macro Targets</h3>
+          <p>Track your daily meals with automated progress tracking against targets: 2,000 kcal, 140g protein, 250g carbs, and 70g healthy fats.</p>
+          <ul class="feature-bullet-list">
+            <li><i class="fas fa-check text-success"></i> 6 Nutritionist-Curated Quick-Add Meals</li>
+            <li><i class="fas fa-check text-success"></i> Remaining & Surplus Calorie Meter</li>
+            <li><i class="fas fa-check text-success"></i> Detailed Meal History Log</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. HEVY-STYLE BOTTOM CTA (Closing Argument) -->
+    <section class="hevy-closing-cta">
+      <div class="cta-card-box">
+        <h2>Start Tracking Your Health & Workouts Today</h2>
+        <p>Join millions of athletes and healthy individuals using HealthHub to plan workouts, monitor vitals, and fuel their daily nutrition.</p>
+        <div class="cta-btn-row">
+          <button class="hevy-btn-large" id="ctaSignupBtn"><i class="fas fa-arrow-right"></i> Create Free Account</button>
+          <a href="https://wa.me/923092333121?text=Hello%20Adeeb%20Tech%20Lab%20team,%20I%20would%20like%20to%20hire%20you%20as%20a%20personal%20trainer." target="_blank" rel="noopener" class="hevy-btn-outline"><i class="fab fa-whatsapp" style="color: #25d366; font-size: 1.15rem;"></i> Hire Us as a Trainer</a>
+        </div>
+      </div>
+    </section>
+
+  
+    </div><!-- End landingView -->
+
+    <!-- 4. INTERACTIVE LIVE APPLICATION WORKSPACE (The Core Modules) -->
+    <section class="app-workspace-container hidden" id="app-workspace">
+      
+      <!-- Header handles navigation pills -->
+
+      <!-- ==================== TAB 1: DASHBOARD ==================== -->
+      <div id="ws-dashboard" class="workspace-panel active">
+        <!-- Search & Greeting Bar (Matches Hevy / Modern Clean Screen) -->
+        <div class="clean-page-head">
+          <div class="clean-head-text">
+            <h2>Today's Overview</h2>
+            <p id="todayDateStr" class="text-muted">Sunday, November 22, 2026</p>
+          </div>
+          <div class="clean-search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="quickSearchInput" class="clean-search-input" placeholder="Search vitals, meals, or workouts...">
+          </div>
+        </div>
+
+        <!-- 8-Tile Rounded "My Metrics" Grid -->
+        <div class="clean-metrics-grid">
+          <div class="clean-metric-tile" data-modal="modal-health">
+            <div class="metric-icon-soft icon-bp"><i class="fas fa-tint"></i></div>
+            <span class="clean-metric-name">Blood Pressure</span>
+            <strong class="clean-metric-reading" id="metricTileBP">118/76 <small>mmHg</small></strong>
+          </div>
+          <div class="clean-metric-tile" data-modal="modal-health">
+            <div class="metric-icon-soft icon-hr"><i class="fas fa-heart-pulse"></i></div>
+            <span class="clean-metric-name">Heart Rate</span>
+            <strong class="clean-metric-reading" id="metricTileHR">68 <small>bpm</small></strong>
+          </div>
+          <div class="clean-metric-tile" data-modal="modal-health">
+            <div class="metric-icon-soft icon-glucose"><i class="fas fa-droplet"></i></div>
+            <span class="clean-metric-name">Glucose</span>
+            <strong class="clean-metric-reading" id="metricTileGlucose">90 <small>mg/dL</small></strong>
+          </div>
+          <div class="clean-metric-tile" data-modal="modal-health">
+            <div class="metric-icon-soft icon-weight"><i class="fas fa-weight-scale"></i></div>
+            <span class="clean-metric-name">Weight</span>
+            <strong class="clean-metric-reading" id="metricTileWeight">71 <small>kg</small></strong>
+          </div>
+          <div class="clean-metric-tile" onclick="switchWorkspaceTab('exercise')">
+            <div class="metric-icon-soft icon-workout"><i class="fas fa-person-running"></i></div>
+            <span class="clean-metric-name">Workout</span>
+            <strong class="clean-metric-reading" id="metricTileWorkout">40 <small>mins</small></strong>
+          </div>
+          <div class="clean-metric-tile" onclick="switchWorkspaceTab('nutrition')">
+            <div class="metric-icon-soft icon-nutrition"><i class="fas fa-apple-whole"></i></div>
+            <span class="clean-metric-name">Calories</span>
+            <strong class="clean-metric-reading" id="metricTileCalories">880 <small>kcal</small></strong>
+          </div>
+          <div class="clean-metric-tile" onclick="switchWorkspaceTab('reminders')">
+            <div class="metric-icon-soft icon-meds"><i class="fas fa-pills"></i></div>
+            <span class="clean-metric-name">Medication</span>
+            <strong class="clean-metric-reading" id="metricTileReminders">4 <small>alerts</small></strong>
+          </div>
+          <div class="clean-metric-tile" onclick="switchWorkspaceTab('music')">
+            <div class="metric-icon-soft icon-music"><i class="fas fa-music"></i></div>
+            <span class="clean-metric-name">Workout Audio</span>
+            <strong class="clean-metric-reading">5+ <small>tracks</small></strong>
+          </div>
+        </div>
+
+        <!-- Dual Column: Left Smooth Curve + Right CarePulse Widget -->
+        <div class="clean-dashboard-split">
+          <div class="smooth-card">
+            <div class="smooth-card-header">
+              <div>
+                <h4 class="smooth-card-title">Vitals Dynamic Trend</h4>
+                <span class="text-muted" style="font-size: 0.8rem;">Weekly fluctuations & balance</span>
+              </div>
+              <div class="chart-legend-pills">
+                <span class="legend-pill"><span class="dot-pink"></span> Systolic</span>
+                <span class="legend-pill"><span class="dot-teal"></span> Diastolic</span>
+              </div>
+            </div>
+            <div class="canvas-wrapper-clean">
+              <canvas id="dashboardTrendChart"></canvas>
+            </div>
+          </div>
+
+          <div class="smooth-column-right">
+            <!-- Daily Calorie Progress Card -->
+            <div class="smooth-routine-card">
+              <div class="routine-header">
+                <div>
+                  <h4 style="font-size: 1rem; font-weight: 700;">Daily Calorie Fuel</h4>
+                  <span class="text-muted" style="font-size: 0.8rem;">Goal: 2,000 kcal</span>
+                </div>
+                <span class="routine-badge-soft" id="dashRemainingBadge">1,120 kcal left</span>
+              </div>
+              <div class="clean-progress-bg">
+                <div class="clean-progress-fill" id="dashCalFill" style="width: 44%;"></div>
+              </div>
+              <div class="routine-footer-pills">
+                <span>🥩 Protein: <strong id="dashProt">68g</strong></span>
+                <span>🌾 Carbs: <strong id="dashCarb">90g</strong></span>
+                <span>🥑 Fat: <strong id="dashFat">24g</strong></span>
+              </div>
+            </div>
+
+            <!-- Quick Action Launcher Bar -->
+            <div class="quick-launcher-bar">
+              <button class="clean-action-pill" data-modal="modal-health">
+                <i class="fas fa-plus-circle text-primary"></i> + Health Stat
+              </button>
+              <button class="clean-action-pill" data-modal="modal-workout">
+                <i class="fas fa-bolt text-warning"></i> + Workout
+              </button>
+              <button class="clean-action-pill" data-modal="modal-meal">
+                <i class="fas fa-apple-alt text-success"></i> + Meal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: HEALTH VITALS ==================== -->
+      <div id="ws-health" class="workspace-panel">
+        <div class="section-header">
+          <div>
+            <h2>Health Vitals Tracking</h2>
+            <p class="text-muted">Monitor blood pressure, resting heart rate, blood sugar, and weight with clinical normal ranges.</p>
+          </div>
+          <div class="header-button-group">
+            <button class="pill-btn secondary-btn" id="exportHealthCsvBtn">
+              <i class="fas fa-download"></i> Export Health CSV
+            </button>
+            <button class="pill-btn primary-btn" data-modal="modal-health">
+              + Log Health Record
+            </button>
+          </div>
+        </div>
+
+        <!-- Upper Row: Latest Vitals Reading (Left) + Clinical Normal Range Reference (Right) -->
+        <div class="vitals-top-split">
+          <!-- Left: Latest Reading Metric Badges -->
+          <div class="vitals-status-card">
+            <div class="vitals-status-head">
+              <div class="vitals-status-icon bg-cyan"><i class="fas fa-heart-pulse"></i></div>
+              <div>
+                <h4>Latest Vitals Reading</h4>
+                <span class="text-muted" id="vitalsLatestDate">No records logged</span>
+              </div>
+              <span class="status-pill status-normal" id="vitalsLatestBadge">Optimal</span>
+            </div>
+            <div class="vitals-status-grid">
+              <div class="v-stat-box">
+                <span class="v-stat-lbl">Blood Pressure</span>
+                <strong class="v-stat-val" id="vStatBP">--/--</strong>
+                <small class="text-muted">Target: &lt;120/80</small>
+              </div>
+              <div class="v-stat-box">
+                <span class="v-stat-lbl">Heart Rate</span>
+                <strong class="v-stat-val" id="vStatHR">-- bpm</strong>
+                <small class="text-muted">Normal: 60-100</small>
+              </div>
+              <div class="v-stat-box">
+                <span class="v-stat-lbl">Fasting Sugar</span>
+                <strong class="v-stat-val" id="vStatSugar">-- mg/dL</strong>
+                <small class="text-muted">Normal: 70-99</small>
+              </div>
+              <div class="v-stat-box">
+                <span class="v-stat-lbl">Body Weight</span>
+                <strong class="v-stat-val" id="vStatWeight">-- kg</strong>
+                <small class="text-muted">Trend monitored</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Clean Minimal Text Clinical Ranges (As clean text) -->
+          <div class="vitals-ranges-text-card">
+            <h4 class="ranges-text-title"><i class="fas fa-clipboard-check text-primary"></i> Clinical Reference Standards</h4>
+            <div class="ranges-text-list">
+              <div class="range-text-row">
+                <span class="range-bullet bullet-good"></span>
+                <div>
+                  <strong>Normal Blood Pressure</strong>
+                  <span>&lt; 120/80 mmHg</span>
+                </div>
+              </div>
+              <div class="range-text-row">
+                <span class="range-bullet bullet-warn"></span>
+                <div>
+                  <strong>Elevated BP</strong>
+                  <span>120-129 / &lt;80 mmHg</span>
+                </div>
+              </div>
+              <div class="range-text-row">
+                <span class="range-bullet bullet-danger"></span>
+                <div>
+                  <strong>High Blood Pressure (Stage 1/2)</strong>
+                  <span>&ge; 130/80 mmHg</span>
+                </div>
+              </div>
+              <div class="range-text-row">
+                <span class="range-bullet bullet-good"></span>
+                <div>
+                  <strong>Fasting Blood Glucose</strong>
+                  <span>70 &ndash; 99 mg/dL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Row: Dual Graphs Side-by-Side (BP Trend Curve & Weight Trend Curve) -->
+        <div class="vitals-charts-grid">
+          <div class="chart-box">
+            <div class="chart-header">
+              <div>
+                <h3>Blood Pressure Trend</h3>
+                <span class="chart-tagline">Systolic & Diastolic tracking (mmHg)</span>
+              </div>
+              <div class="chart-legend-pills">
+                <span class="legend-pill"><span class="dot-pink"></span> Systolic</span>
+                <span class="legend-pill"><span class="dot-teal"></span> Diastolic</span>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="bpChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-header">
+              <div>
+                <h3>Weight Trend Curve</h3>
+                <span class="chart-tagline">Body weight fluctuations over time (kg)</span>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="weightChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health History Records Table -->
+        <div class="table-card mt-6">
+          <div class="table-header">
+            <h3>Health Record History</h3>
+            <span class="records-count" id="healthCountBadge">0 records</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="healthTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Blood Pressure (mmHg)</th>
+                  <th>Heart Rate (bpm)</th>
+                  <th>Blood Sugar (mg/dL)</th>
+                  <th>Weight (kg)</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="healthTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: EXERCISE & PLANS ==================== -->
+      <div id="ws-exercise" class="workspace-panel">
+        <div class="section-header">
+          <div>
+            <h2>Exercise & Fitness Plans</h2>
+            <p class="text-muted">Follow pre-made workout routines, use the active session timer with music, and log your progress.</p>
+          </div>
+          <div class="header-button-group">
+            <button class="pill-btn secondary-btn" id="openLiveTimerBtn" style="font-weight: 700;">
+              <i class="fas fa-stopwatch text-primary"></i> Open Live Timer
+            </button>
+            <button class="pill-btn primary-btn" data-modal="modal-workout">
+              + Custom Workout Log
+            </button>
+          </div>
+        </div>
+
+        <div class="weekly-stats-strip">
+          <div class="weekly-stat-tile">
+            <span class="tile-label">This Week's Active Time</span>
+            <span class="tile-val" id="weeklyMinutes">0 <small>mins</small></span>
+          </div>
+          <div class="weekly-stat-tile">
+            <span class="tile-label">This Week's Burned</span>
+            <span class="tile-val" id="weeklyCalories">0 <small>kcal</small></span>
+          </div>
+          <div class="weekly-stat-tile">
+            <span class="tile-label">Workouts Completed</span>
+            <span class="tile-val" id="weeklyCount">0 <small>sessions</small></span>
+          </div>
+        </div>
+
+        <div class="subheading-wrap" style="margin-top: 2rem;">
+          <h3>Pre-Made Workout Plans</h3>
+        </div>
+        <div class="plans-grid" id="plansGrid"></div>
+
+        <div class="table-card mt-6">
+          <div class="table-header">
+            <h3>Workout History</h3>
+            <span class="records-count" id="workoutCountBadge">0 sessions</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="workoutTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Exercise / Routine</th>
+                  <th>Type</th>
+                  <th>Duration (mins)</th>
+                  <th>Calories Burned (kcal)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="workoutTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: NUTRITION & MEALS ==================== -->
+      <div id="ws-nutrition" class="workspace-panel">
+        <div class="section-header" style="margin-bottom: 1.75rem;">
+          <div>
+            <h2 style="margin-bottom: 0.35rem;">Nutrition &amp; Curated Daily Meals</h2>
+            <p class="text-muted" style="font-size: 0.95rem;">Track calories, protein, carbs, and fats or choose balanced chef-curated meals.</p>
+          </div>
+          <div class="header-button-group">
+            <button class="pill-btn primary-btn" data-modal="modal-meal">
+              + Custom Meal Log
+            </button>
+          </div>
+        </div>
+        <div class="meal-suggestions-grid" id="mealSuggestionsGrid"></div>
+
+        <div class="table-card mt-6">
+          <div class="table-header">
+            <h3>Meal Log History</h3>
+            <span class="records-count" id="mealCountBadge">0 meals</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="mealsTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Meal Name</th>
+                  <th>Calories (kcal)</th>
+                  <th>Protein (g)</th>
+                  <th>Carbs (g)</th>
+                  <th>Fat (g)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="mealsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 5: MUSIC PLAYER ==================== -->
+      <div id="ws-music" class="workspace-panel">
+        <div class="section-header">
+          <div>
+            <h2>Workout Music Player</h2>
+            <p class="text-muted">Listen to built-in tracks or upload your own audio files. Keeps playing as you navigate!</p>
+          </div>
+          <div class="header-button-group">
+            <label for="customAudioFileInput" class="pill-btn primary-btn cursor-pointer">
+              <i class="fas fa-folder-open"></i> + Add Custom Song (MP3 / Audio)
+            </label>
+            <input type="file" id="customAudioFileInput" accept="audio/*" style="display: none;">
+            <button class="pill-btn secondary-btn" data-modal="modal-add-song-url">
+              <i class="fas fa-link"></i> + Add via URL
+            </button>
+          </div>
+        </div>
+
+        <div class="player-layout">
+          <div class="hero-player-card">
+            <div class="player-cover-wrap">
+              <img id="mainPlayerArt" src="https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80" alt="Album Art" class="player-cover-img">
+              <div class="now-playing-disc-badge" id="playerPulseDot"></div>
+            </div>
+            
+            <div class="player-info">
+              <h3 id="mainPlayerTitle">Energize Warmup</h3>
+              <p id="mainPlayerArtist" class="text-muted">SoundHelix Acoustic & Synth Collection</p>
+            </div>
+
+            <div class="player-scrub-bar">
+              <span id="mainPlayerCurrentTime">0:00</span>
+              <input type="range" id="mainPlayerProgress" min="0" max="100" value="0" aria-label="Audio scrubber">
+              <span id="mainPlayerDuration">0:00</span>
+            </div>
+
+            <div class="player-controls-row">
+              <button class="ctrl-btn-round" id="mainPrevBtn" title="Previous Track"><i class="fas fa-backward-step"></i></button>
+              <button class="ctrl-btn-play" id="mainPlayPauseBtn" title="Play / Pause">
+                <i class="fas fa-play" id="mainPlayIcon"></i>
+                <i class="fas fa-pause" id="mainPauseIcon" style="display:none;"></i>
+              </button>
+              <button class="ctrl-btn-round" id="mainNextBtn" title="Next Track"><i class="fas fa-forward-step"></i></button>
+            </div>
+
+            <div class="player-volume-box">
+              <i class="fas fa-volume-low vol-icon"></i>
+              <input type="range" id="mainVolumeSlider" min="0" max="1" step="0.05" value="0.75" aria-label="Main Volume">
+              <i class="fas fa-volume-high vol-icon"></i>
+            </div>
+          </div>
+
+          <div class="playlist-card">
+            <div class="playlist-header">
+              <div>
+                <h3>Track Library</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">Click any track to play</span>
+              </div>
+              <span class="badge-pill" id="trackCountBadge">5 Tracks</span>
+            </div>
+            <div class="track-list" id="trackListContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 6: REMINDERS ==================== -->
+      <div id="ws-reminders" class="workspace-panel">
+        <div class="section-header">
+          <div>
+            <h2>Health &amp; Wellness Reminders</h2>
+            <p class="text-muted">Schedule alerts for hydration, medication, exercise, and clinical checkups.</p>
+          </div>
+          <div class="header-button-group">
+            <button class="pill-btn primary-btn" data-modal="modal-reminder">
+              + Set Reminder
+            </button>
+          </div>
+        </div>
+
+        <div class="reminder-permission-banner" id="permBanner">
+          <div class="perm-icon"><i class="fas fa-bell"></i></div>
+          <div class="perm-content">
+            <strong>Browser Notifications</strong>
+            <p>Enable browser notifications to receive sound and desktop popups even if HealthHub is in background.</p>
+          </div>
+          <button class="pill-btn primary-btn" id="requestPermBtn">Grant Permission</button>
+        </div>
+
+        <div class="reminders-grid" id="remindersListContainer"></div>
+      </div>
+
+      <!-- ==================== TAB 7: USER PROFILE ==================== -->
+      <div id="ws-profile" class="workspace-panel">
+        <div class="section-header">
+          <div>
+            <h2>User Profile & Account Settings</h2>
+            <p class="text-muted">Manage your personal profile, update your display name, change password, or set a profile picture.</p>
+          </div>
+        </div>
+
+        <div class="profile-layout-container">
+          <div class="profile-card profile-info-card">
+            <div class="profile-avatar-container">
+              <div class="profile-avatar-large" id="profileLargeAvatar">
+                <span id="profileLargeAvatarInitial">A</span>
+              </div>
+              <label for="profilePicInput" class="avatar-upload-badge" title="Upload custom profile photo">
+                <i class="fas fa-camera"></i>
+              </label>
+              <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+            </div>
+            
+            <!-- Photo Position & Zoom Controls -->
+            <div id="avatarAdjustControls" class="avatar-adjust-box hidden" style="margin-top: 1rem; width: 100%; text-align: left;">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Face Vertical Focus (Top / Center):</label>
+              <input type="range" id="avatarPosY" min="0" max="100" value="20" style="width: 100%;" title="Adjust position to center face">
+            </div>
+
+            <h3 class="profile-user-title" id="profileCardName">User Name</h3>
+            <p class="profile-user-email" id="profileCardEmail">user@healthhub.com</p>
+
+            <div class="profile-stats-mini">
+              <div class="profile-stat-box"><strong id="profileStatVitals">0</strong><span>Vitals Logged</span></div>
+              <div class="profile-stat-box"><strong id="profileStatWorkouts">0</strong><span>Workouts</span></div>
+              <div class="profile-stat-box"><strong id="profileStatReminders">0</strong><span>Reminders</span></div>
+            </div>
+
+            <button type="button" class="pill-btn secondary-btn" id="removeProfilePicBtn" style="margin-top: 1rem; width: 100%;">
+              <i class="fas fa-trash-alt"></i> Remove Custom Picture
+            </button>
+          </div>
+
+          <div class="profile-card profile-edit-card">
+            <h3>Edit Account Details</h3>
+            <form id="profileUpdateForm" class="profile-form">
+              <div class="form-group">
+                <label for="editFullName">Full Name *</label>
+                <input type="text" id="editFullName" placeholder="Enter your full name" required>
+              </div>
+
+              <div class="form-group">
+                <label for="editEmail">Email Address (Read-only)</label>
+                <input type="email" id="editEmail" readonly disabled style="background-color: var(--border-subtle); cursor: not-allowed;">
+              </div>
+
+              <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+
+              <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem;">Change Password</h4>
+              <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.75rem;">Leave password fields blank if you don't wish to change it.</p>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="editNewPassword">New Password</label>
+                  <input type="password" id="editNewPassword" placeholder="Minimum 6 characters" minlength="6">
+                </div>
+                <div class="form-group">
+                  <label for="editConfirmPassword">Confirm New Password</label>
+                  <input type="password" id="editConfirmPassword" placeholder="Repeat new password" minlength="6">
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                <button type="submit" class="pill-btn primary-btn">
+                  <i class="fas fa-save"></i> Save Profile Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    </main>
+
+  <!-- ==================== HEVY-STYLE MULTI-COLUMN FOOTER ==================== -->
+  <footer class="hevy-footer" id="contact-footer">
+    <div class="footer-inner">
+      <div class="footer-columns-grid">
+        
+        <div class="footer-col-brand">
+          <div class="footer-logo">
+            <div class="brand-h-icon" style="width: 30px; height: 30px; font-size: 0.95rem;"><i class="fas fa-heartbeat"></i></div>
+            <span style="font-size: 1.15rem; font-weight: 800;">HealthHub</span>
+          </div>
+          <p class="footer-bio">The simplest, cleanest workout tracker and wellness log by Adeeb Technology Lab.</p>
+          <div class="footer-social-links">
+            <a href="https://www.instagram.com/adeebtechlab/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://web.facebook.com/AdeebTechnologyLab?_rdc=1&_rdr#" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://x.com/AdeebTechLab" target="_blank" rel="noopener" aria-label="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="https://www.tiktok.com/@adeebtechnologylab" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.youtube.com/AdeebTechnologyLab" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#app-workspace" onclick="switchWorkspaceTab('health')">Health Vitals</a></li>
+            <li><a href="#app-workspace" onclick="switchWorkspaceTab('exercise')">Workout Routine Planner</a></li>
+            <li><a href="#app-workspace" onclick="switchWorkspaceTab('nutrition')">Nutrition &amp; Macros</a></li>
+            <li><a href="#app-workspace" onclick="switchWorkspaceTab('music')">Music Audio Player</a></li>
+            <li><a href="#app-workspace" onclick="switchWorkspaceTab('reminders')">Health Reminders</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Hire Us / Contact</h4>
+          <ul>
+            <li><a href="mailto:info_adeebTechlab@gmail.com" style="display:inline-flex; align-items:center; gap:0.5rem; word-break:break-all;"><i class="fas fa-envelope" style="flex-shrink:0;"></i><span>info_adeebTechlab@gmail.com</span></a></li>
+            <li><a href="tel:03092333121" style="display:inline-flex; align-items:center; gap:0.5rem;"><i class="fas fa-phone-alt" style="flex-shrink:0;"></i><span>0309-2333121</span></a></li>
+            <li><a href="https://www.adeebtechlab.com" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:0.5rem;"><i class="fas fa-globe" style="flex-shrink:0;"></i><span>www.adeebtechlab.com</span></a></li>
+            <li><a href="https://wa.me/923092333121?text=Hello%20Adeeb%20Tech%20Lab%20team,%20I%20would%20like%20to%20hire%20you%20as%20a%20personal%20trainer." target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:0.5rem;"><i class="fab fa-whatsapp" style="color:#25d366; flex-shrink:0;"></i><span>Hire as Trainer</span></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Legal &amp; Security</h4>
+          <ul>
+            <li><a href="#" onclick="alert('Privacy Policy: All health records remain private and locally encrypted in your browser.'); return false;">Privacy Policy</a></li>
+            <li><a href="#" onclick="alert('Terms of Service: HealthHub is for personal wellness and fitness tracking.'); return false;">Terms of Service</a></li>
+            <li><a href="#" onclick="alert('Security: Zero tracking cookies. 100% offline-ready LocalStorage protection.'); return false;">Security &amp; Compliance</a></li>
+            <li><a href="#" onclick="alert('Support: Reach us anytime at info_adeebTechlab@gmail.com'); return false;">Support Center</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      
+        <div class="footer-wa-static-wrap" style="text-align: right; margin-top: 1rem;">
+          <a href="https://wa.me/923092333121?text=Hello%20Adeeb%20Tech%20Lab%20team,%20I%20would%20like%20to%20inquire%20about%20personal%20health%20and%20fitness%20services." target="_blank" rel="noopener" class="footer-wa-circle-btn" title="Chat on WhatsApp" aria-label="Chat on WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+            <span>Chat on WhatsApp</span>
+          </a>
+        </div>
+
+      <div class="footer-bottom-bar">
+        <p>&copy; 2026 HealthHub Technologies Inc. All rights reserved.</p>
+        <p class="footer-subtext">
+          <a href="#" style="text-decoration:none; color:var(--text-muted); margin-right: 1rem;" onclick="alert('Privacy Policy: All health data is strictly stored locally on your device.'); return false;">Privacy Policy</a> &bull;
+          <a href="#" style="text-decoration:none; color:var(--text-muted); margin: 0 1rem;" onclick="alert('Terms & Conditions: Free and open personal wellness monitoring.'); return false;">Terms &amp; Conditions</a> &bull;
+          <a href="#" style="text-decoration:none; color:var(--text-muted); margin-left: 1rem;" onclick="alert('Security: Fully protected local storage and client-side encryption.'); return false;">Security</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MODALS ==================== -->
+  
+  <!-- 1. Health Record Modal -->
+  <div class="modal-overlay" id="modal-health">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Log Health Record</h3>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+      <form id="healthForm" class="modal-form">
+        <div class="form-group">
+          <label for="healthDate">Date & Time *</label>
+          <input type="date" id="healthDate" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="bpSystolic">Systolic BP (mmHg) *</label>
+            <input type="number" id="bpSystolic" min="60" max="250" placeholder="e.g. 118" required>
+            <span class="field-hint">Normal: &lt; 120</span>
+          </div>
+          <div class="form-group">
+            <label for="bpDiastolic">Diastolic BP (mmHg) *</label>
+            <input type="number" id="bpDiastolic" min="40" max="150" placeholder="e.g. 78" required>
+            <span class="field-hint">Normal: &lt; 80</span>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="heartRate">Heart Rate (bpm) *</label>
+            <input type="number" id="heartRate" min="30" max="220" placeholder="e.g. 72" required>
+            <span class="field-hint">Resting normal: 60-100</span>
+          </div>
+          <div class="form-group">
+            <label for="bloodSugar">Blood Sugar (mg/dL) *</label>
+            <input type="number" id="bloodSugar" min="40" max="400" placeholder="e.g. 95" required>
+            <span class="field-hint">Fasting normal: 70-99</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="weight">Weight (kg) *</label>
+          <input type="number" id="weight" step="0.1" min="20" max="300" placeholder="e.g. 70.5" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-btn secondary-btn" data-close>Cancel</button>
+          <button type="submit" class="pill-btn primary-btn">Save Health Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Workout Log Modal -->
+  <div class="modal-overlay" id="modal-workout">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Log Workout Session</h3>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+      <form id="workoutForm" class="modal-form">
+        <div class="form-group">
+          <label for="workoutDate">Date *</label>
+          <input type="date" id="workoutDate" required>
+        </div>
+        <div class="form-group">
+          <label for="workoutExercise">Exercise / Routine Title *</label>
+          <input type="text" id="workoutExercise" placeholder="e.g. HIIT Sprint Interval or Full Body" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="workoutType">Type *</label>
+            <select id="workoutType" required>
+              <option value="Cardio">Cardio</option>
+              <option value="Strength">Strength</option>
+              <option value="Full Body">Full Body</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Cycling">Cycling</option>
+              <option value="Pilates">Pilates</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="workoutDuration">Duration (minutes) *</label>
+            <input type="number" id="workoutDuration" min="1" max="480" placeholder="e.g. 45" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="workoutCalories">Calories Burned (kcal) *</label>
+          <input type="number" id="workoutCalories" min="1" max="3000" placeholder="e.g. 320" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-btn secondary-btn" data-close>Cancel</button>
+          <button type="submit" class="pill-btn primary-btn">Log Workout</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Meal Log Modal -->
+  <div class="modal-overlay" id="modal-meal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Log Meal & Nutrition</h3>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+      <form id="mealForm" class="modal-form">
+        <div class="form-group">
+          <label for="mealDate">Date *</label>
+          <input type="date" id="mealDate" required>
+        </div>
+        <div class="form-group">
+          <label for="mealName">Meal Name / Description *</label>
+          <input type="text" id="mealName" placeholder="e.g. Grilled Salmon with Quinoa & Asparagus" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="mealCalories">Calories (kcal) *</label>
+            <input type="number" id="mealCalories" min="0" max="5000" placeholder="e.g. 520" required>
+          </div>
+          <div class="form-group">
+            <label for="mealProtein">Protein (g) *</label>
+            <input type="number" id="mealProtein" min="0" max="500" placeholder="e.g. 42" required>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="mealCarbs">Carbohydrates (g) *</label>
+            <input type="number" id="mealCarbs" min="0" max="500" placeholder="e.g. 45" required>
+          </div>
+          <div class="form-group">
+            <label for="mealFat">Fat (g) *</label>
+            <input type="number" id="mealFat" min="0" max="300" placeholder="e.g. 16" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-btn secondary-btn" data-close>Cancel</button>
+          <button type="submit" class="pill-btn primary-btn">Save Meal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Reminder Modal -->
+  <div class="modal-overlay" id="modal-reminder">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Create Health Reminder</h3>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+      <form id="reminderForm" class="modal-form">
+        <div class="form-group">
+          <label for="reminderTitle">Reminder Title *</label>
+          <input type="text" id="reminderTitle" placeholder="e.g. Take Blood Pressure Medication" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="reminderTime">Time *</label>
+            <input type="time" id="reminderTime" required>
+          </div>
+          <div class="form-group">
+            <label for="reminderRepeat">Repeat Schedule *</label>
+            <select id="reminderRepeat" required>
+              <option value="Daily">Daily</option>
+              <option value="Once">Once</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reminderType">Reminder Category *</label>
+          <select id="reminderType" required>
+            <option value="medicine">💊 Medicine</option>
+            <option value="water">💧 Water Hydration</option>
+            <option value="workout">⚡ Workout Session</option>
+            <option value="checkup">🩺 Health Checkup</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-btn secondary-btn" data-close>Cancel</button>
+          <button type="submit" class="pill-btn primary-btn">Set Reminder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Add Song via URL Modal -->
+  <div class="modal-overlay" id="modal-add-song-url">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Add Song via Audio URL</h3>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+      <form id="addSongUrlForm" class="modal-form">
+        <div class="form-group">
+          <label for="songTitleInput">Song Title *</label>
+          <input type="text" id="songTitleInput" placeholder="e.g. Workout Bassline Remix" required>
+        </div>
+        <div class="form-group">
+          <label for="songArtistInput">Artist / Album</label>
+          <input type="text" id="songArtistInput" placeholder="e.g. Gym Motivation Beats">
+        </div>
+        <div class="form-group">
+          <label for="songUrlInput">Direct Audio Stream / MP3 URL *</label>
+          <input type="url" id="songUrlInput" placeholder="https://example.com/audio/song.mp3" required>
+          <span class="field-hint">Supports direct .mp3, .wav, or .ogg web links.</span>
+        </div>
+        <div class="form-group">
+          <label for="songArtUrlInput">Album Art Image URL (Optional)</label>
+          <input type="url" id="songArtUrlInput" placeholder="https://images.unsplash.com/...">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="pill-btn secondary-btn" data-close>Cancel</button>
+          <button type="submit" class="pill-btn primary-btn">Add Song to Library</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+  
+
+  
+  <!-- ==================== INTERACTIVE REMINDER RINGING POPUP MODAL ==================== -->
+  <div class="modal-overlay" id="modal-reminder-alert" style="z-index: 1000;">
+    <div class="modal-window" style="max-width: 440px; text-align: center; padding: 2.25rem 1.75rem; border-radius: 24px;">
+      <div class="reminder-alarm-bell" id="reminderAlarmBell">
+        <i class="fas fa-bell"></i>
+      </div>
+      <span class="reminder-type-tag" id="alertPopupType" style="margin-top: 1rem; display: inline-block;">MEDICATION</span>
+      <h3 id="alertPopupTitle" style="font-size: 1.45rem; font-weight: 800; margin: 0.85rem 0 0.4rem 0;">Take Vitamin D Supplement</h3>
+      <p id="alertPopupTime" style="color: var(--primary-color); font-weight: 700; font-size: 1.15rem; margin-bottom: 0.75rem;">Scheduled for 08:00 AM</p>
+      <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.75rem;">Time to complete this wellness activity and keep your daily streak alive!</p>
+      
+      <div style="display: flex; gap: 0.85rem; justify-content: center;">
+        <button type="button" class="pill-btn secondary-btn" id="dismissAlertModalBtn" style="flex: 1; justify-content: center;">Dismiss</button>
+        <button type="button" class="pill-btn primary-btn" id="completeAlertModalBtn" style="flex: 1; justify-content: center;"><i class="fas fa-check"></i> Mark Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DEDICATED LIVE WORKOUT TIMER ==================== -->
+  <div class="modal-overlay" id="modal-live-timer" style="z-index: 1000;">
+    <div class="modal-window" style="max-width: 480px; text-align: center; padding: 2.25rem 2rem; border-radius: 24px;">
+      <div class="modal-header" style="justify-content: space-between; border-bottom: 0; padding-bottom: 0;">
+        <span class="timer-badge" style="background-color: var(--primary-soft); color: var(--primary-color); font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.78rem;">ACTIVE WORKOUT SESSION</span>
+        <button class="modal-close-btn" data-close>&times;</button>
+      </div>
+
+      <h3 id="activeRoutineName" style="font-size: 1.4rem; font-weight: 800; margin-top: 1rem; margin-bottom: 0.35rem;">Live Workout Session</h3>
+      <p class="text-muted" id="activeRoutineDesc" style="font-size: 0.88rem; margin-bottom: 1.5rem;">Background music continues seamlessly while the timer counts your active minutes.</p>
+
+      <div style="background-color: var(--hevy-bg); border: 2px solid var(--hevy-border); border-radius: 20px; padding: 1.5rem; margin-bottom: 1.75rem;">
+        <span class="timer-clock" id="workoutTimerClock" style="font-size: 3.4rem; font-weight: 800; color: var(--primary-color); font-family: monospace; letter-spacing: 0.05em;">00:00</span>
+      </div>
+
+      <div class="timer-btns" style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button class="pill-btn primary-btn" id="startTimerBtn" style="flex: 1; justify-content: center;"><i class="fas fa-play"></i> Start Timer</button>
+        <button class="pill-btn secondary-btn" id="pauseTimerBtn" style="flex: 1; justify-content: center;" disabled><i class="fas fa-pause"></i> Pause</button>
+        <button class="pill-btn danger-btn" id="finishWorkoutBtn" style="flex: 1; justify-content: center;" disabled><i class="fas fa-flag-checkered"></i> Finish &amp; Log</button>
+      </div>
+    </div>
+  </div>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>
